@@ -62,3 +62,5 @@ install(TARGETS VerifyAssimp RUNTIME DESTINATION bin/VerifyAssimp)
 add_executable(VerifyVulkan ${GENERAL_SOURCES} "./src/app/VerifyVulkan.cpp")
 target_link_libraries(VerifyVulkan ${ALL_LIBRARIES})
 install(TARGETS VerifyVulkan RUNTIME DESTINATION bin/VerifyVulkan)
+
+
