@@ -63,6 +63,12 @@ add_executable(VerifyVulkan ${GENERAL_SOURCES} "./src/app/VerifyVulkan.cpp")
 target_link_libraries(VerifyVulkan ${ALL_LIBRARIES})
 install(TARGETS VerifyVulkan RUNTIME DESTINATION bin/VerifyVulkan)
 
+# ProfExercises03
+add_executable(ProfExercises03 ${GENERAL_SOURCES} "./src/app/ProfExercises03.cpp")
+target_link_libraries(ProfExercises03 ${ALL_LIBRARIES})
+install(TARGETS ProfExercises03 RUNTIME DESTINATION bin/ProfExercises03)
+install(DIRECTORY shaders/ProfExercises03 DESTINATION bin/ProfExercises03/shaders)
+
 # Assign01
 add_executable(Assign01 ${GENERAL_SOURCES} "./src/app/Assign01.cpp") 
 target_link_libraries(Assign01 ${ALL_LIBRARIES}) 
