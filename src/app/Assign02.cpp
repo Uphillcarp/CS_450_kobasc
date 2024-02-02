@@ -79,8 +79,8 @@ void createSimplePentagon(Mesh &m) {
 	upperRight.color = glm::vec4(0.0, 1.0, 0.0, 1.0);
 	lowerLeft.color = glm::vec4(0.0, 0.0, 1.0, 1.0);
 	lowerRight.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
-	pointLeft.color = glm::vec4(0.3, 0.7, 1.0, 1.0);
-	pointRight.color = glm::vec4(0.7, 0.3, 1.0, 1.0);
+	pointLeft.color = glm::vec4(0.0, 0.0, 0.0, 1.0);
+	pointRight.color = glm::vec4(0.0, 0.0, 0.0, 1.0);
 
 	// Add to mesh's list of vertices
 	m.vertices.push_back(upperLeft);
