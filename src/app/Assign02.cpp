@@ -61,6 +61,7 @@ void createSimplePentagon(Mesh &m) {
 	// Create four corners
 	Vertex upperLeft, upperRight;
 	Vertex lowerLeft, lowerRight;
+	Vertex pointLeft, pointRight;
 
 	// Set positions of vertices
 	// Note: glm::vec3(x, y, z)
@@ -68,6 +69,9 @@ void createSimplePentagon(Mesh &m) {
 	upperRight.position = glm::vec3(0.5, 0.5, 0.0);
 	lowerLeft.position = glm::vec3(-0.5, -0.5, 0.0);
 	lowerRight.position = glm::vec3(0.5, -0.5, 0.0);
+	pointLeft.position = glm::vec3(-0.9, 0.0, 0.0);
+	pointRight.position = glm::vec3(0.9, 0.0, 0.0);
+
 
 	// Set vertex colors (red, green, blue, white)
 	// Note: glm::vec4(red, green, blue, alpha)
@@ -75,21 +79,29 @@ void createSimplePentagon(Mesh &m) {
 	upperRight.color = glm::vec4(0.0, 1.0, 0.0, 1.0);
 	lowerLeft.color = glm::vec4(0.0, 0.0, 1.0, 1.0);
 	lowerRight.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
+	pointLeft.color = glm::vec4(0.3, 0.7, 1.0, 1.0);
+	pointRight.color = glm::vec4(0.7, 0.3, 1.0, 1.0);
 
 	// Add to mesh's list of vertices
 	m.vertices.push_back(upperLeft);
 	m.vertices.push_back(upperRight);	
 	m.vertices.push_back(lowerLeft);
 	m.vertices.push_back(lowerRight);
+	m.vertices.push_back(pointLeft);
+	m.vertices.push_back(pointRight);
 	
 	// Add indices for two triangles
 	m.indices.push_back(0);
 	m.indices.push_back(3);
 	m.indices.push_back(1);
-
+	
 	m.indices.push_back(0);
 	m.indices.push_back(2);
 	m.indices.push_back(3);
+
+	m.indices.push_back(1);
+	m.indices.push_back(3);
+	m.indices.push_back(5);
 }
 
 // Main 
