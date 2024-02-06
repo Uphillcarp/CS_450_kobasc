@@ -81,8 +81,8 @@ target_link_libraries(Assign02 ${ALL_LIBRARIES})
 install(TARGETS Assign02 RUNTIME DESTINATION bin/Assign02) 
 install(DIRECTORY shaders/Assign02 DESTINATION bin/Assign02/shaders) 
 
-# Exercise03
-add_executable(Exercise03 ${GENERAL_SOURCES} "./src/app/Exercise03.cpp")
-target_link_libraries(Exercise03 ${ALL_LIBRARIES})
-install(TARGETS Exercise03 RUNTIME DESTINATION bin/Exercise03)
-install(DIRECTORY shaders/Exercise03 DESTINATION bin/Exercise03/shaders)
+# Exercises
+add_executable(Exercises ${GENERAL_SOURCES} "./src/app/Exercises.cpp")
+target_link_libraries(Exercises ${ALL_LIBRARIES})
+install(TARGETS Exercises RUNTIME DESTINATION bin/Exercises)
+install(DIRECTORY shaders/Exercises DESTINATION bin/Exercises/shaders)

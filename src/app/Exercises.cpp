@@ -13,6 +13,8 @@
 #include "glm/gtc/type_ptr.hpp"
 using namespace std;
 
+glm::mat4 modelMat(1, 0);
+
 void printRM(string name, glm::mat3 &m){
     cout << name << ": " << endl;
     for(int i = 0; i < 3; i++){
@@ -86,7 +88,7 @@ int main(int argc, char **argv) {
 
     int frameWidth = 800;
     int frameHeight= 600;
-    GLFWwindow *window = glfwCreateWindow(800,600, "Exercise03",
+    GLFWwindow *window = glfwCreateWindow(800,600, "Exercises",
                                             NULL,NULL);
 
     if(!window) {
@@ -109,8 +111,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    string vertCode = readFileToString("./shaders/Exercise03/Simple.vs");
-    string fragCode = readFileToString("./shaders/Exercise03/Simple.fs");
+    string vertCode = readFileToString("./shaders/Exercises/Simple.vs");
+    string fragCode = readFileToString("./shaders/Exercises/Simple.fs");
     //cout << vertCode << endl;
     //cout << fragCode << endl;
 
@@ -132,6 +134,9 @@ int main(int argc, char **argv) {
 
     glDeleteShader(vertID);
     glDeleteShader(fragID);
+
+    GLint modelMatLoc = glGetUniformLocation(progID, "modelMat");
+    cout << "modelMatLoc" << modelMatLoc << endl;
 
     vector<GLfloat> vertOnly = {
         -0.3f, -0.3f, 0.0f,
@@ -176,6 +181,9 @@ int main(int argc, char **argv) {
         glViewport(0,0,frameWidth,frameHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(progID);
+
+        glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(modelMat));
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indices.size(), 
                         GL_UNSIGNED_INT, (void*)0);
