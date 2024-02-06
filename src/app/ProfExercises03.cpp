@@ -37,12 +37,6 @@ int main(int argc, char **argv) {
     glm::vec3 AcE = glm::cross(A, E);
     cout << "(A x E): " << glm::to_string(AcE) << endl;
     
-
-
-
-
-
-
     glfwSetErrorCallback(error_callback);
     if(!glfwInit()) {
         cerr << "ERROR: GLFW FAILED!" << endl;

@@ -51,7 +51,11 @@ int main(int argc, char **argv) {
     float lenA = glm::length(A);
     cout << "Len(A): " << lenA << endl;
     glm::vec3 nA = glm::normalize(A);
-    //cout << "nA: " << nA << endl;
+    cout << "Normalized A: " << glm::to_string(nA) << endl;
+
+    glm::vec3 E(7,8,0);
+    glm::vec3 AcE = glm::cross(A, E);
+    cout << "(A x E): " << glm::to_string(AcE) << endl;
 
     glfwSetErrorCallback(error_callback);
     if(!glfwInit()){
