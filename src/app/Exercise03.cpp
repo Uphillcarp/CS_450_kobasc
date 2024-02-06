@@ -9,6 +9,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
+#include "glm/gtx/transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 using namespace std;
 
 void printRM(string name, glm::mat3 &m){
@@ -29,6 +31,20 @@ void printRM(string name, glm::mat4 &m){
         }
         cout << endl;
     }
+}
+
+static void key_callback(GLFWwindow *window, 
+                        int key, int scancode,
+                        int action, int mods) {
+    if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+        if(key == GLFW_KEY_ESCAPE){
+            glfwSetWindowShouldClose(window, true);
+        }
+        else if(key == GLFW_KEY_Q) {
+            cout << "KEY Q!" << endl;
+        }
+    }
+                    
 }
 
 static void error_callback(int error, const char* desc){
@@ -81,6 +97,8 @@ int main(int argc, char **argv) {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+
+    glfwSetKeyCallback(window, key_callback);
 
     glewExperimental = true;
     GLenum err = glewInit();
