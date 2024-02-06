@@ -11,6 +11,26 @@
 #include "glm/gtx/string_cast.hpp"
 using namespace std;
 
+void printRM(string name, glm::mat3 &m){
+    cout << name << ": " << endl;
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+            cout << m[j][i] << ",";
+        }
+        cout << endl;
+    }
+}
+
+void printRM(string name, glm::mat4 &m){
+    cout << name << ": " << endl;
+    for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+            cout << m[j][i] << ",";
+        }
+        cout << endl;
+    }
+}
+
 static void error_callback(int error, const char* desc){
     cerr << "ERROR" << error << ": " << desc << endl;
 }
