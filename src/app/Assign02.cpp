@@ -52,7 +52,7 @@ void createSimpleQuad(Mesh &m) {
 	m.indices.push_back(3);
 }
 
-// Create very simple mesh: a pentagon (4 vertices, 6 indices, 2 triangles)
+// Create very simple mesh: a pentagon (6 vertices, 9 indices, 3 triangles)
 void createSimplePentagon(Mesh &m) {
 	// Clear out vertices and elements
 	m.vertices.clear();
