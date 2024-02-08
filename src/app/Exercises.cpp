@@ -13,7 +13,7 @@
 #include "glm/gtc/type_ptr.hpp"
 using namespace std;
 
-glm::mat4 modelMat(1, 0);
+glm::mat4 modelMat(1.0);
 
 void printRM(string name, glm::mat3 &m){
     cout << name << ": " << endl;
