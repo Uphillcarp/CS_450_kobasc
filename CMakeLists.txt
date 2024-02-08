@@ -63,6 +63,7 @@ add_executable(VerifyVulkan ${GENERAL_SOURCES} "./src/app/VerifyVulkan.cpp")
 target_link_libraries(VerifyVulkan ${ALL_LIBRARIES})
 install(TARGETS VerifyVulkan RUNTIME DESTINATION bin/VerifyVulkan)
 
+<<<<<<< HEAD
 # ProfExercises03
 add_executable(ProfExercises03 ${GENERAL_SOURCES} "./src/app/ProfExercises03.cpp")
 target_link_libraries(ProfExercises03 ${ALL_LIBRARIES})
@@ -86,3 +87,10 @@ add_executable(Exercises ${GENERAL_SOURCES} "./src/app/Exercises.cpp")
 target_link_libraries(Exercises ${ALL_LIBRARIES})
 install(TARGETS Exercises RUNTIME DESTINATION bin/Exercises)
 install(DIRECTORY shaders/Exercises DESTINATION bin/Exercises/shaders)
+=======
+# ProfExercises
+add_executable(ProfExercises ${GENERAL_SOURCES} "./src/app/ProfExercises.cpp")
+target_link_libraries(ProfExercises ${ALL_LIBRARIES})
+install(TARGETS ProfExercises RUNTIME DESTINATION bin/ProfExercises)
+install(DIRECTORY shaders/ProfExercises DESTINATION bin/ProfExercises/shaders)
+>>>>>>> upstream/main

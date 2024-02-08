@@ -9,7 +9,44 @@
 #include "glm/gtc/matrix_transform.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
+#include "glm/gtx/transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 using namespace std;
+
+glm::mat4 modelMat(1.0);
+
+void printRM(string name, glm::mat3 &m) {
+    cout << name << ": " << endl;
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            cout << m[j][i] << ",";
+        }
+        cout << endl;
+    }
+}
+
+void printRM(string name, glm::mat4 &m) {
+    cout << name << ": " << endl;
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 4; j++) {
+            cout << m[j][i] << ",";
+        }
+        cout << endl;
+    }
+}
+
+static void key_callback(GLFWwindow *window,
+                        int key, int scancode,
+                        int action, int mods) {
+    if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+        if(key == GLFW_KEY_ESCAPE) {
+            glfwSetWindowShouldClose(window, true);
+        }
+        else if(key == GLFW_KEY_Q) {
+            cout << "KEY Q!" << endl;
+        }
+    }
+}
 
 static void error_callback(int error, const char* desc) {
     cerr << "ERROR " << error << ": " << desc << endl;
@@ -65,6 +102,8 @@ int main(int argc, char **argv) {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
+    glfwSetKeyCallback(window, key_callback);
+
     glewExperimental = true;
     GLenum err = glewInit();
     if(err != GLEW_OK) {
@@ -74,8 +113,8 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    string vertCode = readFileToString("./shaders/ProfExercises03/Simple.vs");
-	string fragCode = readFileToString("./shaders/ProfExercises03/Simple.fs");
+    string vertCode = readFileToString("./shaders/ProfExercises/Simple.vs");
+	string fragCode = readFileToString("./shaders/ProfExercises/Simple.fs");
     cout << vertCode << endl;
     cout << fragCode << endl;
 
@@ -97,6 +136,9 @@ int main(int argc, char **argv) {
 
     glDeleteShader(vertID);
     glDeleteShader(fragID);
+
+    GLint modelMatLoc = glGetUniformLocation(progID, "modelMat");
+    cout << "modelMatLoc: " << modelMatLoc << endl;
 
     vector<GLfloat> vertOnly = {
         -0.3f, -0.3f, 0.0f,
@@ -151,6 +193,9 @@ int main(int argc, char **argv) {
         glViewport(0,0,frameWidth,frameHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUseProgram(progID);
+
+        glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(modelMat));
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indexCnt, 
                         GL_UNSIGNED_INT, (void*)0);

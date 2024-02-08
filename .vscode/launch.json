@@ -12,7 +12,11 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
+<<<<<<< HEAD
             "console": "integratedTerminal",
+=======
+            "console": "integratedTerminal", //externalTerminal"
+>>>>>>> upstream/main
         },
         {
             "name": "(Linux) Launch",
