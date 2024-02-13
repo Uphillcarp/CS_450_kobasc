@@ -14,6 +14,7 @@
 using namespace std;
 
 glm::mat4 modelMat(1.0);
+string transformString = "v";
 
 void printRM(string name, glm::mat3 &m) {
     cout << name << ": " << endl;
@@ -43,8 +44,52 @@ static void key_callback(GLFWwindow *window,
             glfwSetWindowShouldClose(window, true);
         }
         else if(key == GLFW_KEY_Q) {
-            cout << "KEY Q!" << endl;
+            modelMat = glm::rotate(glm::radians(5.0f), glm::vec3(0,0,1))*modelMat;
+            transformString = "R(+5)*" + transformString;
         }
+        else if(key == GLFW_KEY_E) {
+            modelMat = glm::rotate(glm::radians(-5.0f), glm::vec3(0,0,1))*modelMat;
+            transformString = "R(-5)*" + transformString;
+        }
+        else if(key == GLFW_KEY_SPACE) {
+            modelMat = glm::mat4(1.0);
+            transformString = "v";
+        }
+        else if(key == GLFW_KEY_F) {
+            modelMat = glm::scale(glm::vec3(0.8,1,1))*modelMat;
+            transformString = "Sx(0.8)*" + transformString;
+        }
+        else if(key == GLFW_KEY_G) {
+            modelMat = glm::scale(glm::vec3(1.25,1,1))*modelMat;
+            transformString = "Sx(1.25)*" + transformString;
+        }
+        else if(key == GLFW_KEY_R) {
+            modelMat = glm::scale(glm::vec3(1,0.8,1))*modelMat;
+            transformString = "Sy(0.8)*" + transformString;
+        }
+        else if(key == GLFW_KEY_T) {
+            modelMat = glm::scale(glm::vec3(1,1.25,1))*modelMat;
+            transformString = "Sy(1.25)*" + transformString;
+        }
+        else if(key == GLFW_KEY_W) {
+            modelMat = glm::translate(glm::vec3(0,0.1,0))*modelMat;
+            transformString = "Ty(+0.1)*" + transformString;
+        }
+        else if(key == GLFW_KEY_S) {
+            modelMat = glm::translate(glm::vec3(0,-0.1,0))*modelMat;
+            transformString = "Ty(-0.1)*" + transformString;
+        }
+        else if(key == GLFW_KEY_A) {
+            modelMat = glm::translate(glm::vec3(-0.1,0,0))*modelMat;
+            transformString = "Tx(-0.1)*" + transformString;
+        }
+        else if(key == GLFW_KEY_D) {
+            modelMat = glm::translate(glm::vec3(0.1,0,0))*modelMat;
+            transformString = "Tx(+0.1)*" + transformString;
+        }
+
+        printRM("Model", modelMat);
+        cout << transformString << endl;
     }
 }
 
