@@ -16,8 +16,26 @@
 using namespace std;
 
 void extractMeshData(aiMesh *mesh, Mesh &m){
+	// Clear out vertices and elements
+	m.vertices.clear();
+	m.indices.clear();
 
-	
+	for(int i = 0; i < mesh->mNumVertices; i++){
+		Vertex v;
+		v.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, 
+								mesh->mVertices[i].z);
+		v.color = glm::vec4(1.0, 0.0, 0.0, 1.0);
+
+		m.vertices.push_back(v);
+	}
+
+	for(int i = 0; i < mesh->mNumFaces; i++){
+		aiFace face = mesh->mFaces[i];
+
+		for(int j = 0; j < face.mNumIndices; j++){
+			m.indices.push_back(face.mIndices[j]);
+		}
+	}
 }
 
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
@@ -115,6 +133,15 @@ void createSimplePentagon(Mesh &m) {
 // Main 
 int main(int argc, char **argv) {
 	
+	string model = "sampleModels/teapot.obj";
+
+	if(argc > 0){
+		model = argv[1];
+	}
+
+	Assimp::Importer importer;
+	const aiScene *scene = importer.ReadFile(model, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices);
+
 	// Are we in debugging mode?
 	bool DEBUG_MODE = true;
 
