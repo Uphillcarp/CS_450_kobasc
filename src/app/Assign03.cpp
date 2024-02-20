@@ -15,6 +15,11 @@
 #include <assimp/postprocess.h>
 using namespace std;
 
+void extractMeshData(aiMesh *mesh, Mesh &m){
+
+	
+}
+
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
 void createSimpleQuad(Mesh &m) {
 	// Clear out vertices and elements
