@@ -14,26 +14,26 @@
 using namespace std;
 
 glm::mat4 modelMat(1.0);
+string transformString = "v";
 glm::mat4 viewMat(1.0);
 glm::mat4 projMat(1.0);
 glm::vec2 lastMousePos(0,0);
-string transformString = "v";
 bool leftMouseDown = false;
 
 static void mouse_button_callback(GLFWwindow *window, int button,
                                     int action, int mods) {
-    if(action == GLFW_PRESS){
-        if(button == GLFW_MOUSE_BUTTON_LEFT)
-        {
+    if(action == GLFW_PRESS) {
+        if(button == GLFW_MOUSE_BUTTON_LEFT) {
             leftMouseDown = true;
             cout << "LEFT MOUSE DOWN" << endl;
         }
     }
-    else if(button == GLFW_MOUSE_BUTTON_LEFT){
-        leftMouseDown = true;
-        cout << "LEFT MOUSE UP" << endl;
+    else if(action == GLFW_RELEASE) {
+        if(button == GLFW_MOUSE_BUTTON_LEFT) {
+            leftMouseDown = false;
+            cout << "LEFT MOUSE UP" << endl;
+        }        
     }
-
 }
 
 static void mouse_motion_callback(GLFWwindow *window, double xpos, double ypos) {
@@ -43,114 +43,113 @@ static void mouse_motion_callback(GLFWwindow *window, double xpos, double ypos) 
     int fw, fh;
     glfwGetFramebufferSize(window, &fw, &fh);
 
-    if(fw > 0 && fh > 0){
+    if(fw > 0 && fh > 0) {
         mouseDiff.x /= fw;
         mouseDiff.y /= fh;
 
         mouseDiff.y = -mouseDiff.y;
-    }
-
-    cout << "MOUSE POS: " << xpos << "," << ypos << endl;
-
-    float angle = mouseDiff.x;
-    glm::mat4 R = glm::rotate(angle, glm::vec3(0,1,0));
+    }       
+    cout << "MOUSE DIFF: " << glm::to_string(mouseDiff) << endl;
+    
+    float angle = 2.0f*mouseDiff.x;
+    glm::mat4 R;
     if(!leftMouseDown) {
         R = glm::rotate(angle, glm::vec3(0,1,0));
     }
-    else{
+    else {
         R = glm::rotate(angle, glm::vec3(1,0,0));
     }
-    modelMat = R*modelMat;
-
+    modelMat = R*modelMat;   
+    
     lastMousePos = glm::vec2(xpos, ypos);
 }
 
-void printRM(string name, glm::mat3 &m){
+void printRM(string name, glm::mat3 &m) {
     cout << name << ": " << endl;
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 3; j++){
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
             cout << m[j][i] << ",";
         }
         cout << endl;
     }
 }
 
-void printRM(string name, glm::mat4 &m){
+void printRM(string name, glm::mat4 &m) {
     cout << name << ": " << endl;
-    for(int i = 0; i < 4; i++){
-        for(int j = 0; j < 4; j++){
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 4; j++) {
             cout << m[j][i] << ",";
         }
         cout << endl;
     }
 }
 
-static void key_callback(GLFWwindow *window, 
+static void key_callback(GLFWwindow *window,
                         int key, int scancode,
                         int action, int mods) {
     if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-        if(key == GLFW_KEY_ESCAPE){
+        if(key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, true);
         }
         else if(key == GLFW_KEY_Q) {
             modelMat = glm::rotate(glm::radians(5.0f), glm::vec3(0,0,1))*modelMat;
-            transformString = "R(+5)" + transformString;
+            transformString = "R(+5)*" + transformString;
         }
         else if(key == GLFW_KEY_E) {
             modelMat = glm::rotate(glm::radians(-5.0f), glm::vec3(0,0,1))*modelMat;
-            transformString = "R(+5)" + transformString;
+            transformString = "R(-5)*" + transformString;
         }
         else if(key == GLFW_KEY_SPACE) {
             modelMat = glm::mat4(1.0);
             transformString = "v";
         }
         else if(key == GLFW_KEY_F) {
-            modelMat = glm::scale(glm::vec3(0.8, 1, 1)) * modelMat;
-            transformString = "S(0.8, 1.0)*" + transformString;
+            modelMat = glm::scale(glm::vec3(0.8,1,1))*modelMat;
+            transformString = "Sx(0.8)*" + transformString;
         }
         else if(key == GLFW_KEY_G) {
-            modelMat = glm::scale(glm::vec3(1.25, 1, 1)) * modelMat;
-            transformString = "S(1.25, 1.0)*" + transformString;
+            modelMat = glm::scale(glm::vec3(1.25,1,1))*modelMat;
+            transformString = "Sx(1.25)*" + transformString;
         }
         else if(key == GLFW_KEY_R) {
-            modelMat = glm::scale(glm::vec3(1, 0.8, 1)) * modelMat;
-            transformString = "S(1.0, 0.8)*" + transformString;
+            modelMat = glm::scale(glm::vec3(1,0.8,1))*modelMat;
+            transformString = "Sy(0.8)*" + transformString;
         }
         else if(key == GLFW_KEY_T) {
-            modelMat = glm::scale(glm::vec3(1, 1.25, 1)) * modelMat;
-            transformString = "S(1, 1.25)*" + transformString;
+            modelMat = glm::scale(glm::vec3(1,1.25,1))*modelMat;
+            transformString = "Sy(1.25)*" + transformString;
         }
         else if(key == GLFW_KEY_W) {
-            modelMat = glm::translate(glm::vec3(0, 0.1, 0)) * modelMat;
-            transformString = "Ty(-0.1)*" + transformString;
+            modelMat = glm::translate(glm::vec3(0,0.1,0))*modelMat;
+            transformString = "Ty(+0.1)*" + transformString;
         }
         else if(key == GLFW_KEY_S) {
-            modelMat = glm::translate(glm::vec3(0, -0.1, 0)) * modelMat;
-            transformString = "Ty(0.1)*" + transformString;
+            modelMat = glm::translate(glm::vec3(0,-0.1,0))*modelMat;
+            transformString = "Ty(-0.1)*" + transformString;
         }
         else if(key == GLFW_KEY_A) {
-            modelMat = glm::translate(glm::vec3(-0.1, 0, 0)) * modelMat;
+            modelMat = glm::translate(glm::vec3(-0.1,0,0))*modelMat;
             transformString = "Tx(-0.1)*" + transformString;
         }
         else if(key == GLFW_KEY_D) {
-            modelMat = glm::translate(glm::vec3(0.1, 0, 0)) * modelMat;
-            transformString = "Tx(0.1)*" + transformString;
+            modelMat = glm::translate(glm::vec3(0.1,0,0))*modelMat;
+            transformString = "Tx(+0.1)*" + transformString;
         }
-        
+
         printRM("Model", modelMat);
         cout << transformString << endl;
-    }               
+    }
 }
 
-static void error_callback(int error, const char* desc){
-    cerr << "ERROR" << error << ": " << desc << endl;
+static void error_callback(int error, const char* desc) {
+    cerr << "ERROR " << error << ": " << desc << endl;
 }
 
 int main(int argc, char **argv) {
-    cout << "BEGIN OPENGL ADVENTURE" << endl;
+    cout << "BEGIN OPENGL ADVENTURE!" << endl;
 
-    glm::vec3 A(1, 4, 0);
-    glm::vec3 B = glm::vec3(2, 3, 2);
+    glm::vec3 A(1,4,0);
+    glm::vec3 B = glm::vec3(2,3,2);
     cout << "A: " << glm::to_string(A) << endl;
     cout << "B: " << glm::to_string(B) << endl;
 
@@ -167,22 +166,25 @@ int main(int argc, char **argv) {
     glm::vec3 E(7,8,0);
     glm::vec3 AcE = glm::cross(A, E);
     cout << "(A x E): " << glm::to_string(AcE) << endl;
-
+    
     glfwSetErrorCallback(error_callback);
-    if(!glfwInit()){
-        cerr << "ERROR: GLFW FAILED" << endl;
+    if(!glfwInit()) {
+        cerr << "ERROR: GLFW FAILED!" << endl;
         exit(1);
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // Mac: 1
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, true);
 
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+	
     int frameWidth = 800;
-    int frameHeight= 600;
-    GLFWwindow *window = glfwCreateWindow(800,600, "Exercises",
-                                            NULL,NULL);
+    int frameHeight = 600;
+    GLFWwindow *window = glfwCreateWindow(frameWidth, frameHeight, 
+                                            "Exercises", 
+                                            NULL, NULL);
 
     if(!window) {
         cerr << "ERROR: WINDOW FAILED!" << endl;
@@ -196,24 +198,27 @@ int main(int argc, char **argv) {
     double mx, my;
     glfwGetCursorPos(window, &mx, &my);
     lastMousePos = glm::vec2(mx, my);
-    
+
+    glfwSetInputMode(window, GLFW_CURSOR, 
+                        GLFW_CURSOR_DISABLED);
+
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetCursorPosCallback(window, mouse_motion_callback);
 
     glewExperimental = true;
     GLenum err = glewInit();
-    if(err != GLEW_OK){
-        cerr << "GLEW ERROR";
+    if(err != GLEW_OK) {
+        cerr << "GLEW ERROR: ";
         cerr << glewGetErrorString(err) << endl;
         glfwTerminate();
         exit(1);
     }
 
     string vertCode = readFileToString("./shaders/Exercises/Simple.vs");
-    string fragCode = readFileToString("./shaders/Exercises/Simple.fs");
-    //cout << vertCode << endl;
-    //cout << fragCode << endl;
+	string fragCode = readFileToString("./shaders/Exercises/Simple.fs");
+    cout << vertCode << endl;
+    cout << fragCode << endl;
 
     GLuint vertID = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -237,9 +242,9 @@ int main(int argc, char **argv) {
     GLint modelMatLoc = glGetUniformLocation(progID, "modelMat");
     GLint viewMatLoc = glGetUniformLocation(progID, "viewMat");
     GLint projMatLoc = glGetUniformLocation(progID, "projMat");
-    cout << "modelMatLoc" << modelMatLoc << endl;
-    cout << "viewMatLoc" << viewMatLoc << endl;
-    cout << "projMatLoc" << projMatLoc << endl;
+    cout << "modelMatLoc: " << modelMatLoc << endl;
+    cout << "viewMatLoc: " << viewMatLoc << endl;
+    cout << "projMatLoc: " << projMatLoc << endl;
 
     vector<GLfloat> vertOnly = {
         -0.3f, -0.3f, 0.0f,
@@ -249,6 +254,7 @@ int main(int argc, char **argv) {
     };
 
     vector<GLuint> indices = { 0, 1, 2, 1, 3, 2 };
+    int indexCnt = (int)indices.size();
 
     GLuint VBO = 0;
     GLuint EBO = 0;
@@ -256,36 +262,45 @@ int main(int argc, char **argv) {
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertOnly.size()*sizeof(float),
+    glBufferData(GL_ARRAY_BUFFER, vertOnly.size()*sizeof(float), 
                         vertOnly.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0,3,GL_FLOAT, false, 3*sizeof(float), 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 3*sizeof(float), 0);
 
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(GLuint),
-                        indices.data(), GL_STATIC_DRAW);
+                    indices.data(), GL_STATIC_DRAW);
+    
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    
 
-    glClearColor(1.0,1.0,0.0,1.0);
+    cout << "VAO: " << VAO << endl;
+    cout << "VBO: " << VBO << endl;
+    cout << "EBO: " << EBO << endl;
+    cout << "progID: " << progID << endl;
+
+
+
+
+    glClearColor(1.0, 1.0, 0.0, 1.0);
     glEnable(GL_DEPTH_TEST);
 
-    while(!glfwWindowShouldClose(window)){
+    while(!glfwWindowShouldClose(window)) {
         glfwGetFramebufferSize(window, &frameWidth, &frameHeight);
         float aspect = 1.0f;
-        if(frameHeight > 0){
+        if(frameHeight > 0) {
             aspect = ((float)frameWidth) / ((float)frameHeight);
         }
-        float fov = glm::radians(30.0f);
+        float fov = glm::radians(90.0f);
 
         glViewport(0,0,frameWidth,frameHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -293,22 +308,21 @@ int main(int argc, char **argv) {
 
         glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(modelMat));
 
-        viewMat = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        viewMat = glm::lookAt(glm::vec3(1,0,1), glm::vec3(0,0,0), glm::vec3(0,1,0));
         glUniformMatrix4fv(viewMatLoc, 1, false, glm::value_ptr(viewMat));
 
         projMat = glm::perspective(fov, aspect, 0.1f, 1000.0f);
-        glUniformMatrix4fv(viewMatLoc, 1, false, glm::value_ptr(projMat));
+        glUniformMatrix4fv(projMatLoc, 1, false, glm::value_ptr(projMat));
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, indices.size(), 
+        glDrawElements(GL_TRIANGLES, indexCnt, 
                         GL_UNSIGNED_INT, (void*)0);
         glBindVertexArray(0);
-
         glUseProgram(0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::this_thread::sleep_for(std::chrono::milliseconds(15));
+        this_thread::sleep_for(chrono::milliseconds(15));
     }
 
     glBindVertexArray(0);

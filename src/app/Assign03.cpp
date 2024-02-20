@@ -10,6 +10,9 @@
 #include "MeshGLData.hpp"
 #include "GLSetup.hpp"
 #include "Shader.hpp"
+#include <assimp/Importer.hpp> 
+#include <assimp/scene.h> 
+#include <assimp/postprocess.h>
 using namespace std;
 
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
@@ -112,7 +115,7 @@ int main(int argc, char **argv) {
 
 	// GLFW setup
 	// Switch to 4.1 if necessary for macOS
-	GLFWwindow* window = setupGLFW("Assign02: kobasc", 4, 3, 800, 800, DEBUG_MODE);
+	GLFWwindow* window = setupGLFW("Assign03: kobasc", 4, 3, 800, 800, DEBUG_MODE);
 
 	// GLEW setup
 	setupGLEW(window);
@@ -130,8 +133,8 @@ int main(int argc, char **argv) {
 	GLuint programID = 0;
 	try {		
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shaders/Assign02/Basic.vs");
-		string fragCode = readFileToString("./shaders/Assign02/Basic.fs");
+		string vertexCode = readFileToString("./shaders/Assign03/Basic.vs");
+		string fragCode = readFileToString("./shaders/Assign03/Basic.fs");
 
 		// Print out shader code, just to check
 		if(DEBUG_MODE) printShaderCode(vertexCode, fragCode);
