@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "Shader.hpp"
+#include "MeshData.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
@@ -246,12 +247,36 @@ int main(int argc, char **argv) {
     cout << "viewMatLoc: " << viewMatLoc << endl;
     cout << "projMatLoc: " << projMatLoc << endl;
 
+    /*
     vector<GLfloat> vertOnly = {
         -0.3f, -0.3f, 0.0f,
         0.3f, -0.3f, 0.0f,
         -0.3f, 0.3f, 0.0f,
         0.3f, 0.3f, 0.0f,
     };
+    */
+
+    vector<Vertex> vertOnly;
+    
+    Vertex v0;
+    v0.position = glm::vec3(-0.3f, -0.3f, 0.0f);
+    v0.color = glm::vec4(0, 1, 0, 1);
+    vertOnly.push_back(v0);
+
+    Vertex v1;
+    v1.position = glm::vec3(0.3f, -0.3f, 0.0f);
+    v1.color = glm::vec4(1, 1, 0, 1);
+    vertOnly.push_back(v1);
+
+    Vertex v2;
+    v2.position = glm::vec3(-0.3f, 0.3f, 0.0f);
+    v2.color = glm::vec4(0, 1, 1, 1);
+    vertOnly.push_back(v2);
+
+    Vertex v3;
+    v3.position = glm::vec3(0.3f, 0.3f, 0.0f);
+    v3.color = glm::vec4(0, 0, 1, 1);
+    vertOnly.push_back(v3);
 
     vector<GLuint> indices = { 0, 1, 2, 1, 3, 2 };
     int indexCnt = (int)indices.size();
@@ -262,7 +287,7 @@ int main(int argc, char **argv) {
 
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertOnly.size()*sizeof(float), 
+    glBufferData(GL_ARRAY_BUFFER, vertOnly.size()*sizeof(Vertex), 
                         vertOnly.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -271,7 +296,11 @@ int main(int argc, char **argv) {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, 3*sizeof(float), 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex),
+                            (void*)offsetof(Vertex, position));
+    glVertexAttribPointer(1, 4, GL_FLOAT, false, sizeof(Vertex),
+                            (void*)offsetof(Vertex, color));
 
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

@@ -15,6 +15,29 @@
 #include <assimp/postprocess.h>
 using namespace std;
 
+void extractMeshData(aiMesh *mesh, Mesh &m){
+	// Clear out vertices and elements
+	m.vertices.clear();
+	m.indices.clear();
+
+	for(int i = 0; i < mesh->mNumVertices; i++){
+		Vertex v;
+		v.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, 
+								mesh->mVertices[i].z);
+		v.color = glm::vec4(1.0, 0.0, 0.0, 1.0f);
+
+		m.vertices.push_back(v);
+	}
+
+	for(int i = 0; i < mesh->mNumFaces; i++){
+		aiFace face = mesh->mFaces[i];
+
+		for(int j = 0; j < face.mNumIndices; j++){
+			m.indices.push_back(face.mIndices[j]);
+		}
+	}
+}
+
 // Create very simple mesh: a quad (4 vertices, 6 indices, 2 triangles)
 void createSimpleQuad(Mesh &m) {
 	// Clear out vertices and elements
@@ -109,7 +132,32 @@ void createSimplePentagon(Mesh &m) {
 
 // Main 
 int main(int argc, char **argv) {
-	
+	//Checking CMD Args
+	string model = "";
+
+	if(argc >= 2)
+	{
+		model = argv[1];
+	}
+
+	//Setting Scene
+	Assimp::Importer importer;
+	const aiScene *scene = importer.ReadFile(model, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices);
+
+	//Error checking
+	if(scene == NULL){
+		cout << "ERROR: SCENE NULL" << endl;
+		exit(1);
+	}
+	else if(scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE){
+		cout << "ERROR: mFlags AI_SCENE_FLAGS_INCOMPLETE" << endl;
+		exit(1);
+	}
+	else if(scene->mRootNode == NULL){
+		cout << "ERROR : mRootNode NULL" << endl;
+		exit(1);
+	}
+
 	// Are we in debugging mode?
 	bool DEBUG_MODE = true;
 
@@ -149,13 +197,25 @@ int main(int argc, char **argv) {
 	}
 
 	// Create simple quad or pentagon
-	Mesh m;
-	//createSimpleQuad(m);
-	createSimplePentagon(m);
+	// Mesh m;
+	// createSimpleQuad(m);
+	// createSimplePentagon(m);
 
 	// Create OpenGL mesh (VAO) from data
-	MeshGL mgl;
-	createMeshGL(m, mgl);
+	// MeshGL mgl;
+	// createMeshGL(m, mgl);
+
+	vector<MeshGL> myVector;
+
+	for(int i = 0; i < scene->mNumMeshes; i++){
+		Mesh m;
+		MeshGL mesh;
+
+		extractMeshData(scene->mMeshes[i], m);
+		createMeshGL(m, mesh);
+
+		myVector.push_back(mesh);
+	}
 	
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -173,7 +233,10 @@ int main(int argc, char **argv) {
 		glUseProgram(programID);
 
 		// Draw object
-		drawMesh(mgl);	
+		// drawMesh(mgl);	
+		for(int i = 0; i < myVector.size(); i++){
+			drawMesh(myVector[i]);
+		}
 
 		// Swap buffers and poll for window events		
 		glfwSwapBuffers(window);
@@ -184,7 +247,12 @@ int main(int argc, char **argv) {
 	}
 
 	// Clean up mesh
-	cleanupMesh(mgl);
+	// cleanupMesh(mgl);
+
+	for(int i = 0; i < myVector.size(); i++){
+		cleanupMesh(myVector[i]);
+	}
+
 
 	// Clean up shader programs
 	glUseProgram(0);
