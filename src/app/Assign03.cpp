@@ -135,6 +135,10 @@ int main(int argc, char **argv) {
 	//Checking CMD Args
 	string model = "";
 
+	if(argc = 0)
+	{
+		model = "/sampleModels/teapot.obj";
+	}
 	if(argc >= 2)
 	{
 		model = argv[1];
