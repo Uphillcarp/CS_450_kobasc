@@ -133,12 +133,8 @@ void createSimplePentagon(Mesh &m) {
 // Main 
 int main(int argc, char **argv) {
 	//Checking CMD Args
-	string model = "";
+	string model = "./sampleModels/teapot.obj";
 
-	if(argc = 0)
-	{
-		model = "/sampleModels/teapot.obj";
-	}
 	if(argc >= 2)
 	{
 		model = argv[1];
