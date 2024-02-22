@@ -133,7 +133,7 @@ void createSimplePentagon(Mesh &m) {
 // Main 
 int main(int argc, char **argv) {
 	//Checking CMD Args
-	string model = "./sampleModels/teapot.obj";
+	string model = "./sampleModels/sphere.obj";
 
 	if(argc >= 2)
 	{
@@ -252,7 +252,6 @@ int main(int argc, char **argv) {
 	for(int i = 0; i < myVector.size(); i++){
 		cleanupMesh(myVector[i]);
 	}
-
 
 	// Clean up shader programs
 	glUseProgram(0);
