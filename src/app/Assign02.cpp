@@ -130,8 +130,8 @@ int main(int argc, char **argv) {
 	GLuint programID = 0;
 	try {		
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shaders/BasicOpenGL/Basic.vs");
-		string fragCode = readFileToString("./shaders/BasicOpenGL/Basic.fs");
+		string vertexCode = readFileToString("./shaders/Assign02/Basic.vs");
+		string fragCode = readFileToString("./shaders/Assign02/Basic.fs");
 
 		// Print out shader code, just to check
 		if(DEBUG_MODE) printShaderCode(vertexCode, fragCode);

@@ -15,7 +15,7 @@ using namespace std;
 
 glm::mat4 modelMat(1.0);
 glm::mat4 viewMat(1.0);
-glm::mat4 porjMat(1.0);
+glm::mat4 projMat(1.0);
 string transformString = "v";
 
 void printRM(string name, glm::mat3 &m){
