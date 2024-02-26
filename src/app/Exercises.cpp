@@ -15,6 +15,8 @@
 using namespace std;
 
 glm::mat4 modelMat(1.0);
+glm::mat4 viewMat(1.0);
+glm::mat4 projMat(1.0);
 string transformString = "v";
 glm::mat4 viewMat(1.0);
 glm::mat4 projMat(1.0);
