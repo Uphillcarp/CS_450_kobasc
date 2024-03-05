@@ -13,7 +13,40 @@
 #include <assimp/Importer.hpp> 
 #include <assimp/scene.h> 
 #include <assimp/postprocess.h>
+#include "glm/gtc/matrix_transform.hpp"  
+#include "glm/gtx/transform.hpp" 
+#include "glm/gtx/string_cast.hpp" 
+#include "glm/gtc/type_ptr.hpp" 
+#include "Utility.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
 using namespace std;
+
+float rotAngle = 0.0f;
+
+glm::mat4 makeRotateZ(glm::vec3 offset){
+
+}
+
+void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat,  
+					GLint modelMatLoc, int level){
+
+}
+
+static void key_callback(GLFWwindow *window,
+                        int key, int scancode,
+                        int action, int mods) {
+    if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+        if(key == GLFW_KEY_ESCAPE) {
+            glfwSetWindowShouldClose(window, true);
+        }
+		else if(key == GLFW_KEY_J){
+			rotAngle += 1.0;
+		}
+		else if(key == GLFW_KEY_K){
+			rotAngle -= 1.0;
+		}
+    }
+}
 
 void extractMeshData(aiMesh *mesh, Mesh &m){
 	// Clear out vertices and elements
@@ -170,6 +203,9 @@ int main(int argc, char **argv) {
 
 	// Check OpenGL version
 	checkOpenGLVersion();
+
+	// Set key_callback
+	glfwSetKeyCallback(window, key_callback);
 
 	// Set up debugging (if requested)
 	if(DEBUG_MODE) checkAndSetupOpenGLDebugging();
