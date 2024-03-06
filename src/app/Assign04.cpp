@@ -24,12 +24,38 @@ using namespace std;
 float rotAngle = 0.0f;
 
 glm::mat4 makeRotateZ(glm::vec3 offset){
+	glm::mat4 R(1.0);
 
+	R = glm::translate(-offset);
+	R = glm::rotate(glm::radians(rotAngle), glm::vec3(0,0,1))*R;
+	R = glm::translate(offset);
+
+	return R;
 }
 
 void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat,  
-					GLint modelMatLoc, int level){
+					GLint modelMatLoc, int level){					
+	aiMatrix4x4 transform = node->mTransformation;
+	glm::mat4 nodeT;
 
+	aiMatToGLM4(transform, nodeT);
+
+	glm::mat4 modelMat = parentMat*nodeT;
+	glm::vec3 pos = glm::vec3(modelMat[3].x, modelMat[3].y, modelMat[3].z);
+
+	glm::mat4 R = makeRotateZ(pos);
+
+	glm::mat4 tmpModel = R * modelMat;
+	glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(tmpModel));
+
+	for(int i = 0; i < node->mNumMeshes; i++){
+		int index = node->mMeshes[i];
+		drawMesh(allMeshes.at(index));
+	}
+	
+	for(int i = 0; i < node->mNumChildren; i++){
+		renderScene(allMeshes, node->mChildren[i], modelMat, modelMatLoc, level+1);
+	}
 }
 
 static void key_callback(GLFWwindow *window,
@@ -252,6 +278,8 @@ int main(int argc, char **argv) {
 
 		myVector.push_back(mesh);
 	}
+
+	GLint modelMatLoc = glGetUniformLocation(programID, "modelMat");
 	
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -269,10 +297,13 @@ int main(int argc, char **argv) {
 		glUseProgram(programID);
 
 		// Draw object
-		// drawMesh(mgl);	
+		// drawMesh(mgl);
+		/*
 		for(int i = 0; i < myVector.size(); i++){
 			drawMesh(myVector[i]);
 		}
+		*/
+		renderScene(myVector, scene->mRootNode, glm::mat4(1.0), modelMatLoc, 0);
 
 		// Swap buffers and poll for window events		
 		glfwSwapBuffers(window);
