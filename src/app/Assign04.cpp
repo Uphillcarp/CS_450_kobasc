@@ -26,9 +26,9 @@ float rotAngle = 0.0f;
 glm::mat4 makeRotateZ(glm::vec3 offset){
 	glm::mat4 R(1.0);
 
-	R = glm::translate(-offset);
+	R = glm::translate(-offset)*R;
 	R = glm::rotate(glm::radians(rotAngle), glm::vec3(0,0,1))*R;
-	R = glm::translate(offset);
+	R = glm::translate(offset)*R;
 
 	return R;
 }
