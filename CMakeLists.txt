@@ -69,7 +69,12 @@ target_link_libraries(ProfExercises ${ALL_LIBRARIES})
 install(TARGETS ProfExercises RUNTIME DESTINATION bin/ProfExercises)
 install(DIRECTORY shaders/ProfExercises DESTINATION bin/ProfExercises/shaders)
 
-<<<<<<< HEAD
+# ProfFBOExercises
+add_executable(ProfFBOExercises ${GENERAL_SOURCES} "./src/app/ProfFBOExercises.cpp")
+target_link_libraries(ProfFBOExercises ${ALL_LIBRARIES})
+install(TARGETS ProfExercises RUNTIME DESTINATION bin/ProfFBOExercises)
+install(DIRECTORY shaders/ProfExercises DESTINATION bin/ProfFBOExercises/shaders)
+
 # Assign01
 add_executable(Assign01 ${GENERAL_SOURCES} "./src/app/Assign01.cpp") 
 target_link_libraries(Assign01 ${ALL_LIBRARIES}) 
@@ -94,15 +99,14 @@ target_link_libraries(Assign04 ${ALL_LIBRARIES})
 install(TARGETS Assign04 RUNTIME DESTINATION bin/Assign04) 
 install(DIRECTORY shaders/Assign04 DESTINATION bin/Assign04/shaders)
 
+# Assign05
+add_executable(Assign05 ${GENERAL_SOURCES} "./src/app/Assign05.cpp") 
+target_link_libraries(Assign05 ${ALL_LIBRARIES}) 
+install(TARGETS Assign05 RUNTIME DESTINATION bin/Assign04) 
+install(DIRECTORY shaders/Assign05 DESTINATION bin/Assign05/shaders)
+
 # Exercises
 add_executable(Exercises ${GENERAL_SOURCES} "./src/app/Exercises.cpp")
 target_link_libraries(Exercises ${ALL_LIBRARIES})
 install(TARGETS Exercises RUNTIME DESTINATION bin/Exercises)
 install(DIRECTORY shaders/Exercises DESTINATION bin/Exercises/shaders)
-=======
-# ProfFBOExercises
-add_executable(ProfFBOExercises ${GENERAL_SOURCES} "./src/app/ProfFBOExercises.cpp")
-target_link_libraries(ProfFBOExercises ${ALL_LIBRARIES})
-install(TARGETS ProfFBOExercises RUNTIME DESTINATION bin/ProfFBOExercises)
-install(DIRECTORY shaders/ProfFBOExercises DESTINATION bin/ProfFBOExercises/shaders)
->>>>>>> upstream/main
