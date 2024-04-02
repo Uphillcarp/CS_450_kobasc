@@ -22,6 +22,42 @@
 using namespace std;
 
 float rotAngle = 0.0f;
+glm::vec3 eye = glm::vec3(0,0,1);
+glm::vec3 lookAt = glm::vec3(0,0,0);
+glm::vec3 cameraDir = lookAt - eye;
+glm::vec2 mousePos;
+
+glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
+	glm::mat4 R(1.0);
+
+	R = glm::translate(-offset)*R;
+	R = glm::rotate(glm::radians(angle), axis)*R;
+	R = glm::translate(offset)*R;
+
+	return R;
+}
+
+static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos){
+    glm::vec2 relMouse = mousePos - glm::vec2(xpos, ypos);
+	cameraDir = lookAt - eye;
+
+	int fw, fh;
+	glfwGetFramebufferSize(window, &fw, &fh);
+	if(fw > 0 && fh > 0){
+		relMouse.x = relMouse.x/float(fw);
+		relMouse.y = relMouse.y/float(fh);
+
+		glm::mat4 x = makeLocalRotate(eye, glm::vec3(0,1,0), 30.0f * relMouse.x);
+		glm::mat4 y = makeLocalRotate(eye, glm::cross(cameraDir, glm::vec3(0,1,0)), 
+										30.0f * relMouse.y);
+
+		glm::vec4 lookAtV = glm::vec4(lookAt, 1.0)*x*y;
+
+		lookAt = glm::vec3(lookAtV);
+	}
+
+	mousePos = glm::vec2(xpos, ypos);
+}
 
 glm::mat4 makeRotateZ(glm::vec3 offset){
 	glm::mat4 R(1.0);
@@ -65,6 +101,18 @@ static void key_callback(GLFWwindow *window,
         if(key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, true);
         }
+		else if(key == GLFW_KEY_W){
+			cameraDir = lookAt - eye;
+		}
+		else if(key == GLFW_KEY_A){
+			
+		}
+		else if(key == GLFW_KEY_S){
+			cameraDir = lookAt - eye;
+		}
+		else if(key == GLFW_KEY_D){
+			
+		}
 		else if(key == GLFW_KEY_J){
 			rotAngle += 1.0;
 		}
@@ -227,11 +275,23 @@ int main(int argc, char **argv) {
 	// GLEW setup
 	setupGLEW(window);
 
+	//Getting cursor position
+	double mx, my;
+	glfwGetCursorPos(window, &mx, &my);
+
+	mousePos = glm::vec2(mx, my);
+
 	// Check OpenGL version
 	checkOpenGLVersion();
 
 	// Set key_callback
 	glfwSetKeyCallback(window, key_callback);
+
+	// Set mouse_position_callback
+	glfwSetCursorPosCallback(window, mouse_position_callback);
+
+	// Hides cursor
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
 	// Set up debugging (if requested)
 	if(DEBUG_MODE) checkAndSetupOpenGLDebugging();
@@ -257,6 +317,8 @@ int main(int argc, char **argv) {
 		cleanupGLFW(window);
 		exit(EXIT_FAILURE);
 	}
+
+	glGetUniformLocation(programID, "projMat");
 
 	// Create simple quad or pentagon
 	// Mesh m;
