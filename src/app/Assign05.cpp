@@ -24,7 +24,6 @@ using namespace std;
 float rotAngle = 0.0f;
 glm::vec3 eye = glm::vec3(0,0,1);
 glm::vec3 lookAt = glm::vec3(0,0,0);
-glm::vec3 cameraDir = lookAt - eye;
 glm::vec2 mousePos;
 
 glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
@@ -39,19 +38,20 @@ glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
 
 static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos){
     glm::vec2 relMouse = mousePos - glm::vec2(xpos, ypos);
-	cameraDir = lookAt - eye;
+	glm::vec3 cameraDir = lookAt - eye;
 
 	int fw, fh;
 	glfwGetFramebufferSize(window, &fw, &fh);
 	if(fw > 0 && fh > 0){
-		relMouse.x = relMouse.x/float(fw);
-		relMouse.y = relMouse.y/float(fh);
+		relMouse.x = ((float)relMouse.x)/((float)fw);
+		relMouse.y = ((float)relMouse.y)/((float)fh);
 
 		glm::mat4 x = makeLocalRotate(eye, glm::vec3(0,1,0), 30.0f * relMouse.x);
 		glm::mat4 y = makeLocalRotate(eye, glm::cross(cameraDir, glm::vec3(0,1,0)), 
 										30.0f * relMouse.y);
+		glm::mat4 xy = x*y;
 
-		glm::vec4 lookAtV = glm::vec4(lookAt, 1.0)*x*y;
+		glm::vec4 lookAtV = xy * glm::vec4(lookAt, 1.0);
 
 		lookAt = glm::vec3(lookAtV);
 	}
@@ -102,13 +102,13 @@ static void key_callback(GLFWwindow *window,
             glfwSetWindowShouldClose(window, true);
         }
 		else if(key == GLFW_KEY_W){
-			cameraDir = lookAt - eye;
+			
 		}
 		else if(key == GLFW_KEY_A){
 			
 		}
 		else if(key == GLFW_KEY_S){
-			cameraDir = lookAt - eye;
+			
 		}
 		else if(key == GLFW_KEY_D){
 			
@@ -278,7 +278,6 @@ int main(int argc, char **argv) {
 	//Getting cursor position
 	double mx, my;
 	glfwGetCursorPos(window, &mx, &my);
-
 	mousePos = glm::vec2(mx, my);
 
 	// Check OpenGL version
@@ -342,6 +341,8 @@ int main(int argc, char **argv) {
 	}
 
 	GLint modelMatLoc = glGetUniformLocation(programID, "modelMat");
+	GLint viewMatLoc = glGetUniformLocation(programID,"viewMat");
+	GLint projMatLoc = glGetUniformLocation(programID,"projMat");
 	
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -357,6 +358,18 @@ int main(int argc, char **argv) {
 
 		// Use shader program
 		glUseProgram(programID);
+
+		float aspect = 1.0f;
+        if(fwidth > 0 && fheight > 0) {
+            aspect = ((float)fwidth) / ((float)fheight);
+        }
+		float fov = glm::radians(90.0f);
+
+		glm::mat4 viewMat = glm::lookAt(eye, lookAt, glm::vec3(0,1,0));
+		glUniformMatrix4fv(viewMatLoc, 1, false, glm::value_ptr(viewMat));
+
+		glm::mat4 projMat = glm::perspective(fov, aspect, 0.1f, 50.0f);
+		glUniformMatrix4fv(projMatLoc, 1, false, glm::value_ptr(projMat));
 
 		// Draw object
 		// drawMesh(mgl);
