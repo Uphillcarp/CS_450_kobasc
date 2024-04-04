@@ -102,16 +102,32 @@ static void key_callback(GLFWwindow *window,
             glfwSetWindowShouldClose(window, true);
         }
 		else if(key == GLFW_KEY_W){
-			
+			glm::vec3 dir = lookAt - eye;
+			dir = glm::normalize(dir);
+			dir *= 0.1f;
+			lookAt += dir;
+			eye += dir;
 		}
 		else if(key == GLFW_KEY_A){
-			
+			glm::vec3 localx = glm::cross(lookAt - eye, glm::vec3(0,1,0));
+			localx = glm::normalize(localx);
+			localx *= -0.1f;
+			lookAt += localx;
+			eye += localx;
 		}
 		else if(key == GLFW_KEY_S){
-			
+			glm::vec3 dir = lookAt - eye;
+			dir = glm::normalize(dir);
+			dir *= -0.1f;
+			lookAt += dir;
+			eye += dir;
 		}
 		else if(key == GLFW_KEY_D){
-			
+			glm::vec3 localx = glm::cross(lookAt - eye, glm::vec3(0,1,0));
+			localx = glm::normalize(localx);
+			localx *= 0.1f;
+			lookAt += localx;
+			eye += localx;
 		}
 		else if(key == GLFW_KEY_J){
 			rotAngle += 1.0;
