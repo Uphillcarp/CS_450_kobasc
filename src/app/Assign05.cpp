@@ -22,6 +22,42 @@
 using namespace std;
 
 float rotAngle = 0.0f;
+glm::vec3 eye = glm::vec3(0,0,1);
+glm::vec3 lookAt = glm::vec3(0,0,0);
+glm::vec2 mousePos;
+
+glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
+	glm::mat4 R(1.0);
+
+	R = glm::translate(-offset)*R;
+	R = glm::rotate(glm::radians(angle), axis)*R;
+	R = glm::translate(offset)*R;
+
+	return R;
+}
+
+static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos){
+    glm::vec2 relMouse = mousePos - glm::vec2(xpos, ypos);
+	glm::vec3 cameraDir = lookAt - eye;
+
+	int fw, fh;
+	glfwGetFramebufferSize(window, &fw, &fh);
+	if(fw > 0 && fh > 0){
+		relMouse.x = ((float)relMouse.x)/((float)fw);
+		relMouse.y = ((float)relMouse.y)/((float)fh);
+
+		glm::mat4 x = makeLocalRotate(eye, glm::vec3(0,1,0), 30.0f * relMouse.x);
+		glm::mat4 y = makeLocalRotate(eye, glm::cross(cameraDir, glm::vec3(0,1,0)), 
+										30.0f * relMouse.y);
+		glm::mat4 xy = x*y;
+
+		glm::vec4 lookAtV = xy * glm::vec4(lookAt, 1.0);
+
+		lookAt = glm::vec3(lookAtV);
+	}
+
+	mousePos = glm::vec2(xpos, ypos);
+}
 
 glm::mat4 makeRotateZ(glm::vec3 offset){
 	glm::mat4 R(1.0);
@@ -65,6 +101,34 @@ static void key_callback(GLFWwindow *window,
         if(key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, true);
         }
+		else if(key == GLFW_KEY_W){
+			glm::vec3 dir = lookAt - eye;
+			dir = glm::normalize(dir);
+			dir *= 0.1f;
+			lookAt += dir;
+			eye += dir;
+		}
+		else if(key == GLFW_KEY_A){
+			glm::vec3 localx = glm::cross(lookAt - eye, glm::vec3(0,1,0));
+			localx = glm::normalize(localx);
+			localx *= -0.1f;
+			lookAt += localx;
+			eye += localx;
+		}
+		else if(key == GLFW_KEY_S){
+			glm::vec3 dir = lookAt - eye;
+			dir = glm::normalize(dir);
+			dir *= -0.1f;
+			lookAt += dir;
+			eye += dir;
+		}
+		else if(key == GLFW_KEY_D){
+			glm::vec3 localx = glm::cross(lookAt - eye, glm::vec3(0,1,0));
+			localx = glm::normalize(localx);
+			localx *= 0.1f;
+			lookAt += localx;
+			eye += localx;
+		}
 		else if(key == GLFW_KEY_J){
 			rotAngle += 1.0;
 		}
@@ -227,11 +291,22 @@ int main(int argc, char **argv) {
 	// GLEW setup
 	setupGLEW(window);
 
+	//Getting cursor position
+	double mx, my;
+	glfwGetCursorPos(window, &mx, &my);
+	mousePos = glm::vec2(mx, my);
+
 	// Check OpenGL version
 	checkOpenGLVersion();
 
 	// Set key_callback
 	glfwSetKeyCallback(window, key_callback);
+
+	// Set mouse_position_callback
+	glfwSetCursorPosCallback(window, mouse_position_callback);
+
+	// Hides cursor
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
 
 	// Set up debugging (if requested)
 	if(DEBUG_MODE) checkAndSetupOpenGLDebugging();
@@ -258,6 +333,8 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
+	glGetUniformLocation(programID, "projMat");
+
 	// Create simple quad or pentagon
 	// Mesh m;
 	// createSimpleQuad(m);
@@ -280,6 +357,8 @@ int main(int argc, char **argv) {
 	}
 
 	GLint modelMatLoc = glGetUniformLocation(programID, "modelMat");
+	GLint viewMatLoc = glGetUniformLocation(programID,"viewMat");
+	GLint projMatLoc = glGetUniformLocation(programID,"projMat");
 	
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
@@ -295,6 +374,18 @@ int main(int argc, char **argv) {
 
 		// Use shader program
 		glUseProgram(programID);
+
+		float aspect = 1.0f;
+        if(fwidth > 0 && fheight > 0) {
+            aspect = ((float)fwidth) / ((float)fheight);
+        }
+		float fov = glm::radians(90.0f);
+
+		glm::mat4 viewMat = glm::lookAt(eye, lookAt, glm::vec3(0,1,0));
+		glUniformMatrix4fv(viewMatLoc, 1, false, glm::value_ptr(viewMat));
+
+		glm::mat4 projMat = glm::perspective(fov, aspect, 0.1f, 50.0f);
+		glUniformMatrix4fv(projMatLoc, 1, false, glm::value_ptr(projMat));
 
 		// Draw object
 		// drawMesh(mgl);
