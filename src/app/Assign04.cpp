@@ -319,6 +319,7 @@ int main(int argc, char **argv) {
 	for(int i = 0; i < myVector.size(); i++){
 		cleanupMesh(myVector[i]);
 	}
+	myVector.clear();
 
 	// Clean up shader programs
 	glUseProgram(0);
