@@ -27,9 +27,12 @@ bool leftMouseDown = false;
 struct PointLight {
     glm::vec4 pos = glm::vec4(0,0,0,1);
     glm::vec4 color = glm::vec4(1,1,1,1);
+    GLint posLoc = -1;
+    GLint colorLoc = -1;
 };
 
-PointLight light;
+const int LIGHT_CNT = 10;
+PointLight lights[LIGHT_CNT];
 
 struct FBO {
     unsigned int ID;
@@ -44,6 +47,40 @@ struct FBO {
         height = 0;
         colorIDs.clear();
         depthRBO = 0;
+    };
+};
+
+struct GBuffer {
+    FBO fbo;
+    vector<int> locs;
+
+    void startGeometry() {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo.ID);
+    };
+
+    void endGeometry() {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    };
+
+    void startLighting() {
+        for(int i = 0; i < locs.size(); i++) {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, fbo.colorIDs.at(i));
+            glUniform1i(locs.at(i), i);
+        }
+    };
+
+    void endLighting() {
+        for(int i = 0; i < locs.size(); i++) {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+    };
+
+    void cleanup() {
+        glDeleteFramebuffers(1, &(fbo.ID));
+        fbo.clear();
+        locs.clear();
     };
 };
 
@@ -96,6 +133,40 @@ void createFBO(FBO &fboObj, int width, int height) {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);                                            
+}
+
+void createGBuffer(GBuffer &gb, int width, int height, int lightProgID, 
+                    string *uniformNames) {    
+    glGenFramebuffers(1, &(gb.fbo.ID));
+    gb.fbo.width = width;
+    gb.fbo.height = height;
+    glBindFramebuffer(GL_FRAMEBUFFER, gb.fbo.ID);
+    for(int i = 0; i < 2; i++) {
+        gb.fbo.colorIDs.push_back(createColorAttachment(width, height,
+                                                GL_RGBA16F, GL_RGBA, 
+                                                GL_FLOAT,
+                                                GL_NEAREST, i));
+    }
+
+    gb.fbo.colorIDs.push_back(createColorAttachment(width, height,
+                                                GL_RGBA, GL_RGBA, 
+                                                GL_UNSIGNED_BYTE,
+                                                GL_NEAREST, 2));
+
+    glDrawBuffers(3, gb.fbo.colorIDs.data());
+
+    for(int i = 0; i < gb.fbo.colorIDs.size(); i++) {
+        gb.locs.push_back(
+            glGetUniformLocation(lightProgID, uniformNames[i].c_str())
+        );
+    }
+    
+    gb.fbo.depthRBO = createDepthRBO(width, height);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        cerr << "ERROR: Incomplete GBuffer::FBO!" << endl;        
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void mouse_button_callback(GLFWwindow *window, int button,
@@ -365,15 +436,15 @@ GLuint loadAndCreateShaderProgram(string vertFile, string fragFile) {
     glCompileShader(vertID);
     glCompileShader(fragID);
 
-    GLuint progID = glCreateProgram();
-    glAttachShader(progID, vertID);
-    glAttachShader(progID, fragID);
-    glLinkProgram(progID);
+    GLuint geoProgID = glCreateProgram();
+    glAttachShader(geoProgID, vertID);
+    glAttachShader(geoProgID, fragID);
+    glLinkProgram(geoProgID);
 
     glDeleteShader(vertID);
     glDeleteShader(fragID);
 
-    return progID;
+    return geoProgID;
 }
 
 int main(int argc, char **argv) {
@@ -452,37 +523,55 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    GLuint progID = loadAndCreateShaderProgram("./shaders/ProfFBOExercises/Simple.vs",
-                                                "./shaders/ProfFBOExercises/Simple.fs");
+    GLuint geoProgID = loadAndCreateShaderProgram(
+        "./shaders/ProfDeferredExercise/Geo.vs",
+        "./shaders/ProfDeferredExercise/Geo.fs");
 
-    GLuint quadProgID = loadAndCreateShaderProgram("./shaders/ProfFBOExercises/Quad.vs",
-                                                //"./shaders/ProfFBOExercises/Quad.fs");
-                                                //"./shaders/ProfFBOExercises/Invert.fs");
-                                                //"./shaders/ProfFBOExercises/Filter.fs");
-                                                "./shaders/ProfFBOExercises/Wavy.fs");
+    GLuint lightProgID = loadAndCreateShaderProgram(
+        "./shaders/ProfDeferredExercise/Light.vs",                                                
+        "./shaders/ProfDeferredExercise/Light.fs");
 
-    GLint modelMatLoc = glGetUniformLocation(progID, "modelMat");
-    GLint viewMatLoc = glGetUniformLocation(progID, "viewMat");
-    GLint projMatLoc = glGetUniformLocation(progID, "projMat");
-    GLint normalMatLoc = glGetUniformLocation(progID, "normalMat");
+    GLint modelMatLoc = glGetUniformLocation(geoProgID, "modelMat");
+    GLint viewMatLoc = glGetUniformLocation(geoProgID, "viewMat");
+    GLint projMatLoc = glGetUniformLocation(geoProgID, "projMat");
+    GLint normalMatLoc = glGetUniformLocation(geoProgID, "normalMat");
     cout << "modelMatLoc: " << modelMatLoc << endl;
     cout << "viewMatLoc: " << viewMatLoc << endl;
     cout << "projMatLoc: " << projMatLoc << endl;
     cout << "normalMatLoc: " << normalMatLoc << endl;
-    GLint lightPosLoc = glGetUniformLocation(progID, "light.pos");
-    GLint lightColorLoc = glGetUniformLocation(progID, "light.color");
+
+    float lightAngleInc = glm::radians(360.0f / LIGHT_CNT);
+    float radius = 0.8f;
+
+    for(int i = 0; i < LIGHT_CNT; i++) {
+        lights[i].pos = glm::vec4(radius * sin(lightAngleInc*i),
+                                    0.1f,
+                                    radius * cos(lightAngleInc*i),
+                                    1.0f);
+        string pos_str = "lights[" + to_string(i) + "].pos";
+        string color_str = "lights[" + to_string(i) + "].color";
+        lights[i].posLoc = glGetUniformLocation(lightProgID, pos_str.c_str());
+        lights[i].colorLoc = glGetUniformLocation(lightProgID, color_str.c_str());
+    }
+
+    //GLint lightPosLoc = glGetUniformLocation(geoProgID, "light.pos");
+    //GLint lightColorLoc = glGetUniformLocation(geoProgID, "light.color");
 
     glfwGetFramebufferSize(window, &frameWidth, &frameHeight);
-    FBO fbo;
-    createFBO(fbo, frameWidth, frameHeight);
+    //FBO fbo;
+    //createFBO(fbo, frameWidth, frameHeight);
 
+    GBuffer gb;
+    createGBuffer(gb, frameWidth, frameHeight, lightProgID, 
+                    new string[3] { "gPosition", "gNormal", "gAlbedoSpec"});
+                    
     unsigned int diffTexID = loadAndCreateTexture("test.png");
     unsigned int normTexID = loadAndCreateTexture("normal.png");
    
-    GLint diffuseTexLoc = glGetUniformLocation(progID, "diffuseTexture");
-    GLint normalTexLoc = glGetUniformLocation(progID, "normalTexture");
+    GLint diffuseTexLoc = glGetUniformLocation(geoProgID, "diffuseTexture");
+    GLint normalTexLoc = glGetUniformLocation(geoProgID, "normalTexture");
 
-    GLint screenTexLoc = glGetUniformLocation(quadProgID, "screenTexture");
+    GLint screenTexLoc = glGetUniformLocation(lightProgID, "screenTexture");
 
     /*
     vector<GLfloat> vertOnly = {
@@ -539,7 +628,7 @@ int main(int argc, char **argv) {
 
 
 
-    cout << "progID: " << progID << endl;
+    cout << "geoProgID: " << geoProgID << endl;
 
 
 
@@ -547,12 +636,12 @@ int main(int argc, char **argv) {
     glClearColor(1.0, 1.0, 0.0, 1.0);
     glEnable(GL_DEPTH_TEST);
 
-    light.pos = glm::vec4(0, 20, 0, 1.0);
+    //light.pos = glm::vec4(0, 20, 0, 1.0);
 
     while(!glfwWindowShouldClose(window)) {
 
         // FIRST PASS /////////////////////////////////////////////////
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo.ID);
+        //glBindFramebuffer(GL_FRAMEBUFFER, fbo.ID);
 
         glfwGetFramebufferSize(window, &frameWidth, &frameHeight);
         float aspect = 1.0f;
@@ -564,7 +653,7 @@ int main(int argc, char **argv) {
         glViewport(0,0,frameWidth,frameHeight);
         glClearColor(1.0, 1.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glUseProgram(progID);
+        glUseProgram(geoProgID);
 
         glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(modelMat));
 
@@ -577,9 +666,11 @@ int main(int argc, char **argv) {
         glm::mat3 normalMat = glm::transpose(glm::inverse(glm::mat3(viewMat*modelMat)));
         glUniformMatrix3fv(normalMatLoc, 1, false, glm::value_ptr(normalMat));
 
-        glm::vec4 lightPos = viewMat*light.pos;
-        glUniform4fv(lightPosLoc, 1, glm::value_ptr(lightPos));
-        glUniform4fv(lightColorLoc, 1, glm::value_ptr(light.color));
+        for(int i = 0; i < LIGHT_CNT; i++) {
+            glm::vec4 lightPos = viewMat*lights[i].pos;
+            glUniform4fv(lights[i].posLoc, 1, glm::value_ptr(lightPos));
+            glUniform4fv(lights[i].colorLoc, 1, glm::value_ptr(lights[i].color));
+        }
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, diffTexID);
@@ -594,11 +685,11 @@ int main(int argc, char **argv) {
         // SECOND PASS /////////////////////////////////////////////
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        glUseProgram(quadProgID);
+        glUseProgram(lightProgID);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, fbo.colorIDs.at(0));
-        glUniform1i(screenTexLoc, 0);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, fbo.colorIDs.at(0));
+        //glUniform1i(screenTexLoc, 0);
 
         glViewport(0,0,frameWidth,frameHeight);
         glClearColor(0.0, 0.0, 1.0, 1.0);
@@ -614,7 +705,8 @@ int main(int argc, char **argv) {
         this_thread::sleep_for(chrono::milliseconds(15));
     }
 
-    glDeleteFramebuffers(1, &(fbo.ID));
+    //glDeleteFramebuffers(1, &(fbo.ID));
+    gb.cleanup();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -627,7 +719,7 @@ int main(int argc, char **argv) {
     cleanupMesh(mainGL);
 
     glUseProgram(0);
-    glDeleteProgram(progID);
+    glDeleteProgram(geoProgID);
 
     glfwDestroyWindow(window);
     glfwTerminate();
