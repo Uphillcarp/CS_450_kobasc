@@ -21,10 +21,19 @@
 #define GLM_ENABLE_EXPERIMENTAL
 using namespace std;
 
+struct PointLight
+{
+	glm::vec4 pos;
+	glm::vec4 color;
+};
+
 float rotAngle = 0.0f;
 glm::vec3 eye = glm::vec3(0,0,1);
 glm::vec3 lookAt = glm::vec3(0,0,0);
 glm::vec2 mousePos;
+
+PointLight light;
+
 
 glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
 	glm::mat4 R(1.0);
@@ -70,9 +79,12 @@ glm::mat4 makeRotateZ(glm::vec3 offset){
 }
 
 void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat,  
-					GLint modelMatLoc, int level){					
+					GLint modelMatLoc, int level){	
 	aiMatrix4x4 transform = node->mTransformation;
 	glm::mat4 nodeT;
+
+	GLint normMatLoc;
+	glm::mat4 viewMat;
 
 	aiMatToGLM4(transform, nodeT);
 
@@ -147,7 +159,9 @@ void extractMeshData(aiMesh *mesh, Mesh &m){
 		Vertex v;
 		v.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, 
 								mesh->mVertices[i].z);
-		v.color = glm::vec4(1.0, 0.0, 0.0, 1.0f);
+		v.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, 
+								mesh->mNormals[i].z);
+		v.color = glm::vec4(1.0, 1.0, 0.0, 1.0f);
 
 		m.vertices.push_back(v);
 	}
@@ -286,7 +300,7 @@ int main(int argc, char **argv) {
 
 	// GLFW setup
 	// Switch to 4.1 if necessary for macOS
-	GLFWwindow* window = setupGLFW("Assign05: kobasc", 4, 3, 800, 800, DEBUG_MODE);
+	GLFWwindow* window = setupGLFW("Assign06: kobasc", 4, 3, 800, 800, DEBUG_MODE);
 
 	// GLEW setup
 	setupGLEW(window);
@@ -318,8 +332,8 @@ int main(int argc, char **argv) {
 	GLuint programID = 0;
 	try {		
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shaders/Assign05/Basic.vs");
-		string fragCode = readFileToString("./shaders/Assign05/Basic.fs");
+		string vertexCode = readFileToString("./shaders/Assign06/Basic.vs");
+		string fragCode = readFileToString("./shaders/Assign06/Basic.fs");
 
 		// Print out shader code, just to check
 		if(DEBUG_MODE) printShaderCode(vertexCode, fragCode);
