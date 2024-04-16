@@ -21,10 +21,19 @@
 #define GLM_ENABLE_EXPERIMENTAL
 using namespace std;
 
+struct PointLight
+{
+	glm::vec4 pos;
+	glm::vec4 color;
+};
+
 float rotAngle = 0.0f;
 glm::vec3 eye = glm::vec3(0,0,1);
 glm::vec3 lookAt = glm::vec3(0,0,0);
 glm::vec2 mousePos;
+
+PointLight light;
+
 
 glm::mat4 makeLocalRotate(glm::vec3 offset, glm::vec3 axis, float angle){
 	glm::mat4 R(1.0);
@@ -70,7 +79,7 @@ glm::mat4 makeRotateZ(glm::vec3 offset){
 }
 
 void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat,  
-					GLint modelMatLoc, int level){					
+					GLint modelMatLoc, glm::mat4 viewMat , GLint normMatLoc, int level){	
 	aiMatrix4x4 transform = node->mTransformation;
 	glm::mat4 nodeT;
 
@@ -84,13 +93,18 @@ void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat,
 	glm::mat4 tmpModel = R * modelMat;
 	glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(tmpModel));
 
+	glm::mat3 normMat = glm::transpose(glm::inverse(glm::mat3(viewMat*tmpModel)));
+
+	glUniformMatrix3fv(normMatLoc, 1, false, glm::value_ptr(normMat));
+
 	for(int i = 0; i < node->mNumMeshes; i++){
 		int index = node->mMeshes[i];
 		drawMesh(allMeshes.at(index));
 	}
 	
 	for(int i = 0; i < node->mNumChildren; i++){
-		renderScene(allMeshes, node->mChildren[i], modelMat, modelMatLoc, level+1);
+		renderScene(allMeshes, node->mChildren[i], modelMat, modelMatLoc, 
+						viewMat, normMatLoc, level+1);
 	}
 }
 
@@ -101,6 +115,18 @@ static void key_callback(GLFWwindow *window,
         if(key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, true);
         }
+		else if(key == GLFW_KEY_1){
+			light.color = glm::vec4(1.0, 1.0, 1.0, 1);
+		}
+		else if(key == GLFW_KEY_2){
+			light.color = glm::vec4(1.0, 0.0, 0.0, 1);
+		}
+		else if(key == GLFW_KEY_3){
+			light.color = glm::vec4(0.0, 1.0, 0.0, 1);
+		}
+		else if(key == GLFW_KEY_4){
+			light.color = glm::vec4(0.0, 0.0, 1.0, 1);
+		}
 		else if(key == GLFW_KEY_W){
 			glm::vec3 dir = lookAt - eye;
 			dir = glm::normalize(dir);
@@ -147,7 +173,9 @@ void extractMeshData(aiMesh *mesh, Mesh &m){
 		Vertex v;
 		v.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, 
 								mesh->mVertices[i].z);
-		v.color = glm::vec4(1.0, 0.0, 0.0, 1.0f);
+		v.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, 
+								mesh->mNormals[i].z);
+		v.color = glm::vec4(1.0, 1.0, 0.0, 1.0f);
 
 		m.vertices.push_back(v);
 	}
@@ -286,7 +314,7 @@ int main(int argc, char **argv) {
 
 	// GLFW setup
 	// Switch to 4.1 if necessary for macOS
-	GLFWwindow* window = setupGLFW("Assign05: kobasc", 4, 3, 800, 800, DEBUG_MODE);
+	GLFWwindow* window = setupGLFW("Assign06: kobasc", 4, 3, 800, 800, DEBUG_MODE);
 
 	// GLEW setup
 	setupGLEW(window);
@@ -318,8 +346,8 @@ int main(int argc, char **argv) {
 	GLuint programID = 0;
 	try {		
 		// Load vertex shader code and fragment shader code
-		string vertexCode = readFileToString("./shaders/Assign05/Basic.vs");
-		string fragCode = readFileToString("./shaders/Assign05/Basic.fs");
+		string vertexCode = readFileToString("./shaders/Assign06/Basic.vs");
+		string fragCode = readFileToString("./shaders/Assign06/Basic.fs");
 
 		// Print out shader code, just to check
 		if(DEBUG_MODE) printShaderCode(vertexCode, fragCode);
@@ -356,6 +384,12 @@ int main(int argc, char **argv) {
 		myVector.push_back(mesh);
 	}
 
+	light.pos = glm::vec4(0.5, 0.5, 0.5, 1);
+	light.color = glm::vec4(1.0, 1.0, 1.0, 1);
+
+	GLint lightPosLoc = glGetUniformLocation(programID, "light.pos");
+	GLint lightColorLoc = glGetUniformLocation(programID, "light.color");
+	GLint normMatLoc = glGetUniformLocation(programID, "normMat");
 	GLint modelMatLoc = glGetUniformLocation(programID, "modelMat");
 	GLint viewMatLoc = glGetUniformLocation(programID,"viewMat");
 	GLint projMatLoc = glGetUniformLocation(programID,"projMat");
@@ -387,6 +421,10 @@ int main(int argc, char **argv) {
 		glm::mat4 projMat = glm::perspective(fov, aspect, 0.1f, 50.0f);
 		glUniformMatrix4fv(projMatLoc, 1, false, glm::value_ptr(projMat));
 
+		glm::vec4 lightPos = viewMat*light.pos;
+        glUniform4fv(lightPosLoc, 1, glm::value_ptr(lightPos));
+        glUniform4fv(lightColorLoc, 1, glm::value_ptr(light.color));
+		
 		// Draw object
 		// drawMesh(mgl);
 		/*
@@ -394,7 +432,8 @@ int main(int argc, char **argv) {
 			drawMesh(myVector[i]);
 		}
 		*/
-		renderScene(myVector, scene->mRootNode, glm::mat4(1.0), modelMatLoc, 0);
+		renderScene(myVector, scene->mRootNode, glm::mat4(1.0), 
+					modelMatLoc, viewMat, normMatLoc, 0);
 
 		// Swap buffers and poll for window events		
 		glfwSwapBuffers(window);
