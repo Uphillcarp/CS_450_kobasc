@@ -93,7 +93,7 @@ void renderScene(vector<MeshGL> &allMeshes, aiNode *node, glm::mat4 parentMat,
 	glm::mat4 tmpModel = R * modelMat;
 	glUniformMatrix4fv(modelMatLoc, 1, false, glm::value_ptr(tmpModel));
 
-	glm::mat3 normMat = glm::transpose(glm::mat3(-viewMat))*glm::mat3(tmpModel);
+	glm::mat3 normMat = glm::transpose(glm::inverse(glm::mat3(viewMat*tmpModel)));
 
 	glUniformMatrix3fv(normMatLoc, 1, false, glm::value_ptr(normMat));
 
