@@ -361,8 +361,6 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	glGetUniformLocation(programID, "projMat");
-
 	// Create simple quad or pentagon
 	// Mesh m;
 	// createSimpleQuad(m);
