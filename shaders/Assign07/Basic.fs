@@ -29,16 +29,17 @@ vec3 getFresnelAtAngleZero(vec3 albedo, float metallic){
 vec3 getFresnel(vec3 F0, vec3 L, vec3 H){
 	float cosAngle = max(0,dot(L,H));
 
-	vec3 fresnel = F0+(1-F0)*pow((max(0,cosAngle)),5);
+	vec3 fresnel = F0+(1-F0)*(pow((1-max(0,cosAngle)),5));
 
 	return fresnel;
 }
 
  float getNDF(vec3 H, vec3 N, float roughness){
-	float a = pow(roughness, 2);
+	float a2 = pow(pow(roughness, 2), 2);
 	float NH = pow(dot(N, H), 2);
+	float dminator = PI * pow(((NH)*(a2 - 1) + 1), 2);
 
-	float ndf = a / (PI*pow(NH*(a + 1) -1, 2));
+	float ndf = a2 / dminator;
 
 	return ndf;
  }
@@ -75,10 +76,7 @@ void main()
 	vec3 kS = F;
 	vec3 kD = 1.0 - kS;
 
-	if(metallic != 1)
-	{
-		kD *= (1.0 - metallic);
-	}
+	kD *= (1.0 - metallic);
 
 	kD *= vec3(vertexColor);
 	kD /= PI;

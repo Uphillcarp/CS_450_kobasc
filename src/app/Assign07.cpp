@@ -165,23 +165,27 @@ static void key_callback(GLFWwindow *window,
 			rotAngle -= 1.0;
 		}
 		else if(key == GLFW_KEY_V){
-			if(metallic > 0){
-				metallic -= 0.1;
+			metallic -= 0.1;
+			if(metallic < 0){
+				metallic = 0;
 			}
 		}
 		else if(key == GLFW_KEY_B){
-			if(metallic < 1){
-				metallic += 0.1;
+			metallic += 0.1;
+			if(metallic > 1){
+				metallic = 1;
 			}
 		}
 		else if(key == GLFW_KEY_N){
-			if(roughness > 0.1){
-				roughness -= 0.1;
+			roughness -= 0.1;
+			if(roughness < 0.1){
+				roughness = 0.1;
 			}
 		}
 		else if(key == GLFW_KEY_M){
-			if(roughness < 0.7){
-				roughness += 0.1;
+			roughness += 0.1;
+			if(roughness > 0.7){
+				roughness = 0.7;
 			}
 		}
     }
