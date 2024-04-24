@@ -28,6 +28,9 @@ struct PointLight
 };
 
 float rotAngle = 0.0f;
+float metallic = 0.0; 
+float roughness = 0.1;
+
 glm::vec3 eye = glm::vec3(0,0,1);
 glm::vec3 lookAt = glm::vec3(0,0,0);
 glm::vec2 mousePos;
@@ -160,6 +163,30 @@ static void key_callback(GLFWwindow *window,
 		}
 		else if(key == GLFW_KEY_K){
 			rotAngle -= 1.0;
+		}
+		else if(key == GLFW_KEY_V){
+			metallic -= 0.1;
+			if(metallic < 0){
+				metallic = 0;
+			}
+		}
+		else if(key == GLFW_KEY_B){
+			metallic += 0.1;
+			if(metallic > 1){
+				metallic = 1;
+			}
+		}
+		else if(key == GLFW_KEY_N){
+			roughness -= 0.1;
+			if(roughness < 0.1){
+				roughness = 0.1;
+			}
+		}
+		else if(key == GLFW_KEY_M){
+			roughness += 0.1;
+			if(roughness > 0.7){
+				roughness = 0.7;
+			}
 		}
     }
 }
@@ -385,6 +412,8 @@ int main(int argc, char **argv) {
 	light.pos = glm::vec4(0.5, 0.5, 0.5, 1);
 	light.color = glm::vec4(1.0, 1.0, 1.0, 1);
 
+	GLint roughnessLoc = glGetUniformLocation(programID, "roughness");
+	GLint metallicLoc = glGetUniformLocation(programID, "metallic");
 	GLint lightPosLoc = glGetUniformLocation(programID, "light.pos");
 	GLint lightColorLoc = glGetUniformLocation(programID, "light.color");
 	GLint normMatLoc = glGetUniformLocation(programID, "normMat");
@@ -423,6 +452,9 @@ int main(int argc, char **argv) {
         glUniform4fv(lightPosLoc, 1, glm::value_ptr(lightPos));
         glUniform4fv(lightColorLoc, 1, glm::value_ptr(light.color));
 		
+		glUniform1f(metallicLoc, metallic);
+		glUniform1f(roughnessLoc, roughness);
+
 		// Draw object
 		// drawMesh(mgl);
 		/*
