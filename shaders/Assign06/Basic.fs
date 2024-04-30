@@ -31,3 +31,4 @@ void main()
 	// Just output interpolated color
 	out_color = vec4(diffColor + specularColor, 1.0);
 }
+
