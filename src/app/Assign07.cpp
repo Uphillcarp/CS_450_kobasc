@@ -21,6 +21,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 using namespace std;
 
+
 struct PointLight
 {
 	glm::vec4 pos;
