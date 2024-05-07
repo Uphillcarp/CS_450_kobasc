@@ -1,0 +1,1 @@
+This is a collection of my assignments I did while I was taking CS450 Computer Graphics at SUNY Polytechnic Institute. There are a few librarys you will need to install. The instuction slides are in the assignDescriptions/CS_450_SetupInstructions.pdf.
